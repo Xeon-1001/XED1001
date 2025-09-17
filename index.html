@@ -75,6 +75,18 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <h1 class="text-3xl font-bold text-slate-900">Interactive Learning Hub</h1>
             <p class="text-slate-500 mt-1">Explore Clustering, ML Applications, and Fuzzy Graph Theory — now with AI-powered insights!</p>
+            <!-- API Key Section -->
+            <div id="api-key-section" class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <label for="api-key-input" class="block text-sm font-medium text-amber-800">Enter Your Gemini API Key to enable AI features:</label>
+                <div class="mt-1 flex items-center space-x-2">
+                    <input type="password" id="api-key-input" class="flex-grow p-2 border border-slate-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Paste your API key here">
+                    <button id="save-api-key-btn" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">Save Key</button>
+                </div>
+                 <p class="text-xs text-slate-500 mt-1">Your key is saved only in your browser. <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-600 hover:underline">Get a Gemini API Key here.</a></p>
+            </div>
+            <div id="api-key-success-msg" class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800" style="display: none;">
+                ✅ API Key saved! AI features are now enabled.
+            </div>
         </div>
     </header>
 
@@ -203,12 +215,20 @@
 
 
     <script>
-        // --- Gemini API Integration ---
-        const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=';
+        let geminiApiKey = ""; // This will be populated from localStorage
 
-        async function callGemini(prompt, element) {
+        // --- Gemini API Integration ---
+        async function callGemini(prompt, element, retries = 3, delay = 1000) {
+            if (!geminiApiKey) {
+                element.innerHTML = '⚠️ Please enter your Gemini API key in the header to use this feature.';
+                element.style.display = 'block';
+                return;
+            }
+
             element.innerHTML = '<div class="spinner"></div><span>Generating...</span>';
             element.style.display = 'flex';
+
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${geminiApiKey}`;
 
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
@@ -222,18 +242,22 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`API Error: ${response.statusText}`);
+                     if (retries > 0 && (response.status === 429 || response.status >= 500)) {
+                         console.log(`Retrying API call... ${retries} attempts left.`);
+                         await new Promise(res => setTimeout(res, delay));
+                         return callGemini(prompt, element, retries - 1, delay * 2);
+                    }
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
                 }
 
                 const result = await response.json();
                 const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
                 
                 if (text) {
-                     // Basic markdown to HTML conversion
                     element.innerHTML = text
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')     // Italic
-                        .replace(/\n/g, '<br>');                // Newlines
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/\n/g, '<br>');
                 } else {
                     element.textContent = 'Sorry, the AI could not generate a response. Please try again.';
                 }
@@ -338,7 +362,6 @@
             runKmeansBtn.disabled = true;
             generateDataBtn.disabled = true;
             
-            // 1. Initialize centroids
             centroids = [];
             const usedIndices = new Set();
             while (centroids.length < k) {
@@ -353,7 +376,6 @@
             await new Promise(r => setTimeout(r, 1000));
 
             for (let iter = 0; iter < 10; iter++) {
-                // 2. Assign points to centroids
                 let changed = false;
                 points.forEach((p, i) => {
                     let min_dist = Infinity;
@@ -379,7 +401,6 @@
                     break;
                 }
 
-                // 3. Update centroids
                 const newCentroids = Array.from({ length: k }, () => ({ x: 0, y: 0, count: 0 }));
                 points.forEach((p, i) => {
                     const k_idx = assignments[i];
@@ -447,7 +468,7 @@
                     const appId = applications.find(a => a.title === title).id;
                     const resultDiv = document.getElementById(`case-study-${appId}`);
                     
-                    const prompt = `You are a data science educator. Write a short, fictional case study (about 100-150 words) explaining how clustering is used for '${title}'. The case study should be easy for a beginner to understand. Describe the type of data used, what the resulting clusters might represent, and the business benefit. Use a fictional company name.`;
+                    const prompt = \`You are a data science educator. Write a short, fictional case study (about 100-150 words) explaining how clustering is used for '${title}'. The case study should be easy for a beginner to understand. Describe the type of data used, what the resulting clusters might represent, and the business benefit. Use a fictional company name.\`;
                     
                     callGemini(prompt, resultDiv);
                 });
@@ -502,10 +523,9 @@
             fuzzyCtx.moveTo(startNode.x, startNode.y);
             fuzzyCtx.lineTo(endNode.x, endNode.y);
             fuzzyCtx.strokeStyle = `rgba(22, 163, 74, ${edge.value})`;
-            fuzzyCtx.lineWidth = 2 + (edge.value * 4); // Thicker for higher value
+            fuzzyCtx.lineWidth = 2 + (edge.value * 4);
             fuzzyCtx.stroke();
             
-            // Draw edge value
             const midX = (startNode.x + endNode.x) / 2;
             const midY = (startNode.y + endNode.y) / 2;
             fuzzyCtx.fillStyle = 'black';
@@ -613,7 +633,6 @@
             const endNode = nodes.find(node => getDistance({x: mouseX, y: mouseY}, node) < 10);
 
             if (isDragging && dragStartNode && endNode && dragStartNode.id !== endNode.id) {
-                // Check if edge already exists
                 const edgeExists = edges.some(edge => 
                     (edge.from === dragStartNode.id && edge.to === endNode.id) ||
                     (edge.from === endNode.id && edge.to === dragStartNode.id)
@@ -629,7 +648,7 @@
         });
         
         fuzzyCanvas.addEventListener('click', e => {
-             if (isDragging) return; // This prevents adding a node when an edge drag fails
+             if (isDragging) return;
              const rect = fuzzyCanvas.getBoundingClientRect();
              const mouseX = e.clientX - rect.left;
              const mouseY = e.clientY - rect.top;
@@ -668,7 +687,7 @@
                 graphDescription += ` - Edge from Node ${e.from} to Node ${e.to} (relationship strength: ${e.value})\n`;
             });
 
-            const prompt = `You are an expert in modeling complex systems. The following describes a fuzzy graph where nodes represent entities and edges represent relationships with a certain degree of strength (from 0 to 1). 
+            const prompt = \`You are an expert in modeling complex systems. The following describes a fuzzy graph where nodes represent entities and edges represent relationships with a certain degree of strength (from 0 to 1). 
             
             Your task is to:
             1. Provide a creative, real-world interpretation of what this graph could represent (e.g., social network, project dependencies, biological system).
@@ -677,11 +696,61 @@
             4. Provide a brief, overall summary of the system's structure or dynamics based on the graph.
             
             Here is the graph data:
-            ${graphDescription}`;
+            \${graphDescription}\`;
 
             callGemini(prompt, graphInterpretationDiv);
         });
 
+        // --- API Key Setup ---
+        function setupApiKey() {
+            const keyInput = document.getElementById('api-key-input');
+            const saveBtn = document.getElementById('save-api-key-btn');
+            const keySection = document.getElementById('api-key-section');
+            const successMsg = document.getElementById('api-key-success-msg');
+            const aiButtons = document.querySelectorAll('.gemini-btn, #interpret-graph-btn');
+
+            function toggleAiFeatures(enabled) {
+                aiButtons.forEach(btn => {
+                    btn.disabled = !enabled;
+                    if (!enabled) {
+                        btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                });
+            }
+
+            const savedKey = localStorage.getItem('geminiApiKey');
+            if (savedKey) {
+                geminiApiKey = savedKey;
+                keySection.style.display = 'none';
+                successMsg.style.display = 'block';
+                toggleAiFeatures(true);
+                setTimeout(() => { successMsg.style.display = 'none'; }, 4000);
+            } else {
+                toggleAiFeatures(false);
+            }
+
+            saveBtn.addEventListener('click', () => {
+                const key = keyInput.value.trim();
+                if (key) {
+                    geminiApiKey = key;
+                    localStorage.setItem('geminiApiKey', key);
+                    keySection.style.display = 'none';
+                    successMsg.style.display = 'block';
+                    toggleAiFeatures(true);
+                    setTimeout(() => { successMsg.style.display = 'none'; }, 4000);
+                } else {
+                    keyInput.classList.add('border-red-500');
+                    keyInput.placeholder = "API Key cannot be empty.";
+                }
+            });
+
+            keyInput.addEventListener('input', () => {
+                keyInput.classList.remove('border-red-500');
+                keyInput.placeholder = "Paste your API key here";
+            });
+        }
 
         // --- Initial Setup ---
         window.onload = () => {
@@ -689,6 +758,7 @@
             renderApplications();
             drawFuzzyGraph();
             updateFuzzyElementList();
+            setupApiKey();
         };
     </script>
 
