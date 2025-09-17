@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide: Clustering & Fuzzy Graph Theory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .tab.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        #kmeans-canvas,
+        #fuzzy-graph-canvas {
+            cursor: crosshair;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <h1 class="text-3xl font-bold text-slate-900">Interactive Learning Hub</h1>
+            <p class="text-slate-500 mt-1">Explore Clustering, ML Applications, and Fuzzy Graph Theory — now with AI-powered insights!</p>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8 -mb-px">
+                <button data-tab-target="clustering" class="tab active text-slate-500 hover:text-blue-600 hover:border-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
+                    Clustering Techniques
+                </button>
+                <button data-tab-target="ml" class="tab text-slate-500 hover:text-blue-600 hover:border-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
+                    Clustering in ML
+                </button>
+                <button data-tab-target="fuzzy" class="tab text-slate-500 hover:text-blue-600 hover:border-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
+                    Fuzzy Graph Theory
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Section 1: Clustering Techniques -->
+        <section id="clustering" class="content-section active space-y-8">
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h2 class="text-2xl font-semibold mb-3">What is Clustering?</h2>
+                <p>Clustering is the task of grouping a set of objects in such a way that objects in the same group (called a cluster) are more similar to each other than to those in other groups. It's a fundamental technique in data mining and unsupervised machine learning, where we don't have pre-labeled data.</p>
+            </div>
+            
+            <!-- K-Means Interactive Demo -->
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                 <h3 class="text-xl font-semibold mb-4">Interactive Example: K-Means Clustering</h3>
+                 <p class="mb-4">K-Means is a popular centroid-based algorithm. It aims to partition data into 'K' clusters where each data point belongs to the cluster with the nearest mean (centroid). Try it yourself!</p>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <canvas id="kmeans-canvas" width="600" height="400"></canvas>
+                        <div id="kmeans-status" class="mt-2 text-sm text-slate-500 h-5"></div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="k-value" class="block text-sm font-medium text-slate-700">Number of Clusters (K)</label>
+                            <input type="range" id="k-value" min="2" max="8" value="3" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                            <span id="k-label" class="text-blue-600 font-semibold">K = 3</span>
+                        </div>
+                        <button id="generate-data-btn" class="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">Generate New Data</button>
+                        <button id="run-kmeans-btn" class="w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors">Run K-Means</button>
+                        <button id="reset-kmeans-btn" class="w-full bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-600 transition-colors">Reset</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Other Clustering Types -->
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h3 class="text-xl font-semibold mb-4">Other Major Clustering Types</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="p-4 border rounded-lg">
+                        <h4 class="font-semibold text-lg">Hierarchical Clustering</h4>
+                        <p class="text-sm text-slate-600 mt-1">Builds a hierarchy of clusters either top-down (divisive) or bottom-up (agglomerative). The result is a tree-based structure called a dendrogram.</p>
+                    </div>
+                    <div class="p-4 border rounded-lg">
+                        <h4 class="font-semibold text-lg">Density-Based Clustering (DBSCAN)</h4>
+                        <p class="text-sm text-slate-600 mt-1">Groups together points that are closely packed together, marking as outliers points that lie alone in low-density regions. It can find arbitrarily shaped clusters.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Clustering in ML -->
+        <section id="ml" class="content-section space-y-8">
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h2 class="text-2xl font-semibold mb-3">Clustering as an Unsupervised Learning Task</h2>
+                <p>In machine learning, clustering is a primary example of <strong class="text-blue-600">unsupervised learning</strong>. This means we don't provide the algorithm with labeled outcomes or target variables. Instead, the goal is to find hidden patterns, structures, or groupings within the input data itself.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h3 class="text-xl font-semibold mb-4">Real-World Applications</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+                    <!-- Application examples will be populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Fuzzy Graph Theory -->
+        <section id="fuzzy" class="content-section space-y-8">
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h2 class="text-2xl font-semibold mb-3">From Crisp to Fuzzy Logic</h2>
+                <p>In classical (or "crisp") set theory, an element either belongs to a set or it does not. Fuzzy logic introduces the concept of <strong class="text-blue-600">degree of membership</strong>. An element can partially belong to a set, measured by a membership value between 0 (not a member) and 1 (full member).</p>
+                <p class="mt-2">A <strong class="text-blue-600">Fuzzy Graph</strong> extends this idea to graph theory. Instead of vertices and edges simply existing or not, they can exist to a certain degree. This is useful for modeling uncertainty and ambiguity in relationships.</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h3 class="text-xl font-semibold mb-4">Interactive Fuzzy Graph Creator</h3>
+                <p class="mb-4">Create your own fuzzy graph! Click to add nodes (vertices). Click and drag from one node to another to create an edge. You'll be prompted to assign a membership value (0 to 1) for each element.</p>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <canvas id="fuzzy-graph-canvas" width="600" height="400"></canvas>
+                    </div>
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-lg">Graph Elements</h4>
+                        <div id="fuzzy-elements" class="text-sm space-y-2 max-h-60 overflow-y-auto p-2 border rounded-md bg-slate-50">
+                           <p class="text-slate-500">Your graph elements will appear here.</p>
+                        </div>
+                        <button id="interpret-graph-btn" class="w-full bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-600 transition-colors flex items-center justify-center">✨ Interpret This Graph</button>
+                        <button id="reset-fuzzy-btn" class="w-full bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-600 transition-colors">Clear Graph</button>
+                        <div id="graph-interpretation" class="mt-4 text-sm p-3 border rounded-md bg-indigo-50 border-indigo-200" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for Fuzzy Graph Input -->
+    <div id="fuzzy-modal" class="modal items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-auto my-16">
+            <h3 id="modal-title" class="text-lg font-semibold mb-4">Enter Membership Value</h3>
+            <p id="modal-text" class="text-sm mb-4">Please provide a value between 0 and 1.</p>
+            <input type="number" id="modal-input" step="0.1" min="0" max="1" class="w-full border-slate-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <div id="modal-error" class="text-red-500 text-sm mt-2" style="display: none;"></div>
+            <div class="mt-5 sm:mt-6 flex justify-end space-x-3">
+                <button type="button" id="modal-cancel" class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50">Cancel</button>
+                <button type="button" id="modal-ok" class="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700">OK</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Gemini API Integration ---
+        const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=';
+
+        async function callGemini(prompt, element) {
+            element.innerHTML = '<div class="spinner"></div><span>Generating...</span>';
+            element.style.display = 'flex';
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (text) {
+                     // Basic markdown to HTML conversion
+                    element.innerHTML = text
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')     // Italic
+                        .replace(/\n/g, '<br>');                // Newlines
+                } else {
+                    element.textContent = 'Sorry, the AI could not generate a response. Please try again.';
+                }
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                element.textContent = 'An error occurred while contacting the AI. Please check the console for details.';
+            }
+        }
+
+        // --- Tab Navigation ---
+        const tabs = document.querySelectorAll('.tab');
+        const sections = document.querySelectorAll('.content-section');
+
+        function showTab(tabName) {
+            tabs.forEach(tab => {
+                const isActive = tab.dataset.tabTarget === tabName;
+                tab.classList.toggle('active', isActive);
+            });
+            sections.forEach(section => {
+                const isActive = section.id === tabName;
+                section.classList.toggle('active', isActive);
+            });
+        }
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                showTab(tab.dataset.tabTarget);
+            });
+        });
+
+
+        // --- K-Means Interactive Demo ---
+        const kmeansCanvas = document.getElementById('kmeans-canvas');
+        const kmeansCtx = kmeansCanvas.getContext('2d');
+        const kValueSlider = document.getElementById('k-value');
+        const kLabel = document.getElementById('k-label');
+        const generateDataBtn = document.getElementById('generate-data-btn');
+        const runKmeansBtn = document.getElementById('run-kmeans-btn');
+        const resetKmeansBtn = document.getElementById('reset-kmeans-btn');
+        const kmeansStatus = document.getElementById('kmeans-status');
+
+        let points = [];
+        let centroids = [];
+        let assignments = [];
+        let k = 3;
+        const colors = ['#3b82f6', '#16a34a', '#ef4444', '#f97316', '#8b5cf6', '#d946ef', '#14b8a6', '#facc15'];
+
+        function setupKmeans() {
+            k = parseInt(kValueSlider.value);
+            kLabel.textContent = `K = ${k}`;
+            generatePoints();
+            drawKmeans();
+        }
+
+        function generatePoints() {
+            points = [];
+            for (let i = 0; i < 100; i++) {
+                points.push({
+                    x: Math.random() * kmeansCanvas.width,
+                    y: Math.random() * kmeansCanvas.height
+                });
+            }
+            centroids = [];
+            assignments = [];
+            kmeansStatus.textContent = "New data generated. Click 'Run K-Means'.";
+        }
+        
+        function drawPoint(p, color = '#475569') {
+            kmeansCtx.beginPath();
+            kmeansCtx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+            kmeansCtx.fillStyle = color;
+            kmeansCtx.fill();
+        }
+
+        function drawCentroid(c, color = 'black') {
+            kmeansCtx.beginPath();
+            kmeansCtx.moveTo(c.x - 7, c.y - 7);
+            kmeansCtx.lineTo(c.x + 7, c.y + 7);
+            kmeansCtx.moveTo(c.x + 7, c.y - 7);
+            kmeansCtx.lineTo(c.x - 7, c.y + 7);
+            kmeansCtx.strokeStyle = color;
+            kmeansCtx.lineWidth = 3;
+            kmeansCtx.stroke();
+        }
+
+        function drawKmeans() {
+            kmeansCtx.clearRect(0, 0, kmeansCanvas.width, kmeansCanvas.height);
+            points.forEach((p, i) => {
+                const color = assignments[i] !== undefined ? colors[assignments[i] % colors.length] : '#475569';
+                drawPoint(p, color);
+            });
+            centroids.forEach((c, i) => {
+                drawCentroid(c, colors[i % colors.length]);
+            });
+        }
+        
+        function getDistance(p1, p2) {
+            return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+        }
+
+        async function runKmeans() {
+            runKmeansBtn.disabled = true;
+            generateDataBtn.disabled = true;
+            
+            // 1. Initialize centroids
+            centroids = [];
+            const usedIndices = new Set();
+            while (centroids.length < k) {
+                const idx = Math.floor(Math.random() * points.length);
+                if (!usedIndices.has(idx)) {
+                   centroids.push({ ...points[idx] });
+                   usedIndices.add(idx);
+                }
+            }
+            drawKmeans();
+            kmeansStatus.textContent = 'Step 1: Initialized random centroids.';
+            await new Promise(r => setTimeout(r, 1000));
+
+            for (let iter = 0; iter < 10; iter++) {
+                // 2. Assign points to centroids
+                let changed = false;
+                points.forEach((p, i) => {
+                    let min_dist = Infinity;
+                    let best_k = -1;
+                    centroids.forEach((c, j) => {
+                        const dist = getDistance(p, c);
+                        if (dist < min_dist) {
+                            min_dist = dist;
+                            best_k = j;
+                        }
+                    });
+                    if (assignments[i] !== best_k) {
+                        changed = true;
+                    }
+                    assignments[i] = best_k;
+                });
+                drawKmeans();
+                kmeansStatus.textContent = `Iteration ${iter + 1}: Assigned points to nearest centroid.`;
+                await new Promise(r => setTimeout(r, 1000));
+
+                if (!changed) {
+                    kmeansStatus.textContent = `Converged after ${iter + 1} iterations.`;
+                    break;
+                }
+
+                // 3. Update centroids
+                const newCentroids = Array.from({ length: k }, () => ({ x: 0, y: 0, count: 0 }));
+                points.forEach((p, i) => {
+                    const k_idx = assignments[i];
+                    newCentroids[k_idx].x += p.x;
+                    newCentroids[k_idx].y += p.y;
+                    newCentroids[k_idx].count++;
+                });
+
+                newCentroids.forEach((c, i) => {
+                    if (c.count > 0) {
+                        centroids[i] = { x: c.x / c.count, y: c.y / c.count };
+                    }
+                });
+                drawKmeans();
+                kmeansStatus.textContent = `Iteration ${iter + 1}: Updated centroid locations.`;
+                if(iter === 9) kmeansStatus.textContent = 'Reached max iterations.';
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            
+            runKmeansBtn.disabled = false;
+            generateDataBtn.disabled = false;
+        }
+
+        kValueSlider.addEventListener('input', (e) => {
+            k = parseInt(e.target.value);
+            kLabel.textContent = `K = ${k}`;
+        });
+        generateDataBtn.addEventListener('click', () => {
+             generatePoints();
+             drawKmeans();
+        });
+        runKmeansBtn.addEventListener('click', runKmeans);
+        resetKmeansBtn.addEventListener('click', setupKmeans);
+
+        // --- Clustering in ML Section ---
+        const applications = [
+            { title: 'Customer Segmentation', icon: '🛍️', description: 'Grouping customers by purchasing behavior to tailor marketing strategies.', id: 'customer-segmentation' },
+            { title: 'Image Segmentation', icon: '🖼️', description: 'Partitioning a digital image into multiple segments (sets of pixels) to simplify image analysis.', id: 'image-segmentation' },
+            { title: 'Biological Data Analysis', icon: '🧬', description: 'Clustering genes with similar expression patterns or identifying species groups.', id: 'bio-data' },
+            { title: 'Document Clustering', icon: '📚', description: 'Grouping articles or documents by topic for search engines and content aggregation.', id: 'doc-clustering' },
+            { title: 'Anomaly Detection', icon: '💳', description: 'Identifying outliers that don\'t belong to any cluster, often used for fraud detection.', id: 'anomaly-detection' }
+        ];
+
+        function renderApplications() {
+            const container = document.querySelector('#ml .grid');
+            container.innerHTML = applications.map(app => `
+                <div class="bg-slate-50 p-4 rounded-lg border">
+                    <div class="flex items-start space-x-4">
+                        <div class="text-3xl">${app.icon}</div>
+                        <div>
+                            <h4 class="font-semibold">${app.title}</h4>
+                            <p class="text-sm text-slate-600">${app.description}</p>
+                            <button class="text-sm text-blue-600 hover:text-blue-800 font-semibold mt-2 gemini-btn" data-app-title="${app.title}">
+                                ✨ Generate Case Study
+                            </button>
+                        </div>
+                    </div>
+                    <div id="case-study-${app.id}" class="mt-3 text-sm p-3 border rounded-md bg-blue-50 border-blue-200" style="display: none;"></div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.gemini-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const title = e.target.dataset.appTitle;
+                    const appId = applications.find(a => a.title === title).id;
+                    const resultDiv = document.getElementById(`case-study-${appId}`);
+                    
+                    const prompt = `You are a data science educator. Write a short, fictional case study (about 100-150 words) explaining how clustering is used for '${title}'. The case study should be easy for a beginner to understand. Describe the type of data used, what the resulting clusters might represent, and the business benefit. Use a fictional company name.`;
+                    
+                    callGemini(prompt, resultDiv);
+                });
+            });
+        }
+        
+        // --- Fuzzy Graph Interactive Demo ---
+        const fuzzyCanvas = document.getElementById('fuzzy-graph-canvas');
+        const fuzzyCtx = fuzzyCanvas.getContext('2d');
+        const resetFuzzyBtn = document.getElementById('reset-fuzzy-btn');
+        const interpretGraphBtn = document.getElementById('interpret-graph-btn');
+        const graphInterpretationDiv = document.getElementById('graph-interpretation');
+        const fuzzyElementsDiv = document.getElementById('fuzzy-elements');
+        const modal = document.getElementById('fuzzy-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalText = document.getElementById('modal-text');
+        const modalInput = document.getElementById('modal-input');
+        const modalError = document.getElementById('modal-error');
+        const modalOk = document.getElementById('modal-ok');
+        const modalCancel = document.getElementById('modal-cancel');
+
+
+        let nodes = [];
+        let edges = [];
+        let nodeCounter = 0;
+        let isDragging = false;
+        let dragStartNode = null;
+        let tempEdgeEnd = null;
+        let currentAction = null;
+
+        function drawNode(node) {
+            fuzzyCtx.beginPath();
+            fuzzyCtx.arc(node.x, node.y, 10, 0, Math.PI * 2);
+            fuzzyCtx.fillStyle = `rgba(59, 130, 246, ${node.value})`;
+            fuzzyCtx.fill();
+            fuzzyCtx.strokeStyle = '#1e3a8a';
+            fuzzyCtx.lineWidth = 2;
+            fuzzyCtx.stroke();
+            fuzzyCtx.fillStyle = 'white';
+            fuzzyCtx.textAlign = 'center';
+            fuzzyCtx.textBaseline = 'middle';
+            fuzzyCtx.font = '10px sans-serif';
+            fuzzyCtx.fillText(node.id, node.x, node.y);
+        }
+        
+        function drawEdge(edge) {
+            const startNode = nodes.find(n => n.id === edge.from);
+            const endNode = nodes.find(n => n.id === edge.to);
+            if (!startNode || !endNode) return;
+
+            fuzzyCtx.beginPath();
+            fuzzyCtx.moveTo(startNode.x, startNode.y);
+            fuzzyCtx.lineTo(endNode.x, endNode.y);
+            fuzzyCtx.strokeStyle = `rgba(22, 163, 74, ${edge.value})`;
+            fuzzyCtx.lineWidth = 2 + (edge.value * 4); // Thicker for higher value
+            fuzzyCtx.stroke();
+            
+            // Draw edge value
+            const midX = (startNode.x + endNode.x) / 2;
+            const midY = (startNode.y + endNode.y) / 2;
+            fuzzyCtx.fillStyle = 'black';
+            fuzzyCtx.font = '12px sans-serif';
+            fuzzyCtx.fillText(edge.value, midX + 5, midY - 5);
+        }
+        
+        function drawFuzzyGraph() {
+            fuzzyCtx.clearRect(0, 0, fuzzyCanvas.width, fuzzyCanvas.height);
+            edges.forEach(drawEdge);
+            if (isDragging && dragStartNode && tempEdgeEnd) {
+                 fuzzyCtx.beginPath();
+                 fuzzyCtx.moveTo(dragStartNode.x, dragStartNode.y);
+                 fuzzyCtx.lineTo(tempEdgeEnd.x, tempEdgeEnd.y);
+                 fuzzyCtx.strokeStyle = 'rgba(0,0,0,0.3)';
+                 fuzzyCtx.setLineDash([5, 5]);
+                 fuzzyCtx.lineWidth = 2;
+                 fuzzyCtx.stroke();
+                 fuzzyCtx.setLineDash([]);
+            }
+            nodes.forEach(drawNode);
+        }
+
+        function updateFuzzyElementList() {
+            if (nodes.length === 0 && edges.length === 0) {
+                 fuzzyElementsDiv.innerHTML = `<p class="text-slate-500">Your graph elements will appear here.</p>`;
+                 return;
+            }
+            fuzzyElementsDiv.innerHTML = '';
+            nodes.forEach(n => {
+                const el = document.createElement('div');
+                el.innerHTML = `<strong>Node ${n.id}:</strong> μ = ${n.value}`;
+                fuzzyElementsDiv.appendChild(el);
+            });
+             edges.forEach(e => {
+                const el = document.createElement('div');
+                el.innerHTML = `<strong>Edge (${e.from}-${e.to}):</strong> μ = ${e.value}`;
+                fuzzyElementsDiv.appendChild(el);
+            });
+        }
+        
+        function openModal(type, data) {
+            modal.style.display = 'flex';
+            modalInput.value = 0.8;
+            modalError.style.display = 'none';
+            currentAction = { type, data };
+            if (type === 'addNode') {
+                modalTitle.textContent = 'Add Node';
+                modalText.textContent = `Enter membership value for new Node ${data.id}.`;
+            } else if (type === 'addEdge') {
+                modalTitle.textContent = 'Add Edge';
+                modalText.textContent = `Enter membership value for edge (${data.from.id}-${data.to.id}).`;
+            }
+        }
+        
+        modalOk.onclick = () => {
+            const value = parseFloat(modalInput.value);
+            if(isNaN(value) || value < 0 || value > 1) {
+                modalError.textContent = "Please enter a value between 0 and 1.";
+                modalError.style.display = 'block';
+                return;
+            }
+            
+            if (currentAction.type === 'addNode') {
+                nodes.push({ ...currentAction.data, value });
+            } else if (currentAction.type === 'addEdge') {
+                edges.push({ from: currentAction.data.from.id, to: currentAction.data.to.id, value });
+            }
+            
+            modal.style.display = 'none';
+            drawFuzzyGraph();
+            updateFuzzyElementList();
+        };
+
+        modalCancel.onclick = () => {
+            modal.style.display = 'none';
+            currentAction = null;
+        }
+
+        fuzzyCanvas.addEventListener('mousedown', e => {
+            const rect = fuzzyCanvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const clickedNode = nodes.find(node => getDistance({x: mouseX, y: mouseY}, node) < 10);
+            
+            if (clickedNode) {
+                isDragging = true;
+                dragStartNode = clickedNode;
+            }
+        });
+
+        fuzzyCanvas.addEventListener('mousemove', e => {
+            if (isDragging && dragStartNode) {
+                 const rect = fuzzyCanvas.getBoundingClientRect();
+                 tempEdgeEnd = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                 drawFuzzyGraph();
+            }
+        });
+
+        fuzzyCanvas.addEventListener('mouseup', e => {
+            const rect = fuzzyCanvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const endNode = nodes.find(node => getDistance({x: mouseX, y: mouseY}, node) < 10);
+
+            if (isDragging && dragStartNode && endNode && dragStartNode.id !== endNode.id) {
+                // Check if edge already exists
+                const edgeExists = edges.some(edge => 
+                    (edge.from === dragStartNode.id && edge.to === endNode.id) ||
+                    (edge.from === endNode.id && edge.to === dragStartNode.id)
+                );
+                if (!edgeExists) {
+                    openModal('addEdge', { from: dragStartNode, to: endNode });
+                }
+            }
+            isDragging = false;
+            dragStartNode = null;
+            tempEdgeEnd = null;
+            drawFuzzyGraph();
+        });
+        
+        fuzzyCanvas.addEventListener('click', e => {
+             if (isDragging) return; // This prevents adding a node when an edge drag fails
+             const rect = fuzzyCanvas.getBoundingClientRect();
+             const mouseX = e.clientX - rect.left;
+             const mouseY = e.clientY - rect.top;
+             
+             const clickedNode = nodes.find(node => getDistance({x: mouseX, y: mouseY}, node) < 10);
+             if (!clickedNode) {
+                 nodeCounter++;
+                 openModal('addNode', { id: nodeCounter, x: mouseX, y: mouseY });
+             }
+        });
+
+        resetFuzzyBtn.addEventListener('click', () => {
+            nodes = [];
+            edges = [];
+            nodeCounter = 0;
+            graphInterpretationDiv.style.display = 'none';
+            graphInterpretationDiv.innerHTML = '';
+            drawFuzzyGraph();
+            updateFuzzyElementList();
+        });
+
+        interpretGraphBtn.addEventListener('click', () => {
+            if (nodes.length === 0) {
+                graphInterpretationDiv.textContent = 'Please create a graph first before interpreting.';
+                graphInterpretationDiv.style.display = 'block';
+                return;
+            }
+
+            let graphDescription = "Nodes:\n";
+            nodes.forEach(n => {
+                graphDescription += ` - Node ${n.id} (importance/existence value: ${n.value})\n`;
+            });
+
+            graphDescription += "\nEdges:\n";
+            edges.forEach(e => {
+                graphDescription += ` - Edge from Node ${e.from} to Node ${e.to} (relationship strength: ${e.value})\n`;
+            });
+
+            const prompt = `You are an expert in modeling complex systems. The following describes a fuzzy graph where nodes represent entities and edges represent relationships with a certain degree of strength (from 0 to 1). 
+            
+            Your task is to:
+            1. Provide a creative, real-world interpretation of what this graph could represent (e.g., social network, project dependencies, biological system).
+            2. Identify the most important entities (nodes with high membership values > 0.7).
+            3. Identify the strongest relationships (edges with high membership values > 0.7).
+            4. Provide a brief, overall summary of the system's structure or dynamics based on the graph.
+            
+            Here is the graph data:
+            ${graphDescription}`;
+
+            callGemini(prompt, graphInterpretationDiv);
+        });
+
+
+        // --- Initial Setup ---
+        window.onload = () => {
+            setupKmeans();
+            renderApplications();
+            drawFuzzyGraph();
+            updateFuzzyElementList();
+        };
+    </script>
+
+</body>
+
+</html>
